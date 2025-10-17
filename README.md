@@ -2,11 +2,25 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+
+## Setup ##
+Esta parte no lo hizo un LLM jeje
+Para empezar, hay que seguir los pasos aqui:
+https://github.com/ultraleap/UltraleapTrackingWebSocket
+
+es basicamente un websocket que coge los señales del driver de leap y lo manda a la libreria de javascript. Deberia estar activo. (running)
+lo podéis pensar como un tipo de servidor.
+
+
+Mano izquierda mueve, derecha escala.
+Un poco más.
+*No hace falta ningun raycasting*
+Al menos por ahora.
 ## Available Scripts
 
 In the project directory, you can run:
 
-### `npm start`
+### ``npm start``
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
@@ -14,12 +28,12 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
 
-### `npm test`
+### ``npm test``
 
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+### ```npm run build```
 
 Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
