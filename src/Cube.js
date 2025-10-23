@@ -1,47 +1,65 @@
 import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 
+// Cooldown period in milliseconds to prevent rapid selection toggling
+const SELECT_COOLDOWN = 500;
+
 function Cube({ frame }) {
   const mesh = useRef();
-  const [isGrabbed, setIsGrabbed] = useState(false);
+  const [isSelected, setIsSelected] = useState(false);
+  const [lastSelectTime, setLastSelectTime] = useState(0);
 
   useFrame(() => {
     if (mesh.current) {
       if (frame && frame.hands.length > 0) {
-        const hand = frame.hands[0];
-        const palmPosition = hand.palmPosition;
+        // Separate hands by type for individual control
+        const leftHand = frame.hands.find(hand => hand.type === 'left');
+        const rightHand = frame.hands.find(hand => hand.type === 'right');
 
-        // --- Position Control ---
-        // The hand's palm position is used to control the cube's position in the 3D scene.
-        // The raw Leap Motion coordinates are scaled to fit the scene's dimensions.
-        // The 'y' coordinate is adjusted to center the cube vertically.
-        const x = palmPosition[0] / 100;
-        const y = (palmPosition[1] / 150) - 1.5; // Adjusted scaling and offset for better vertical positioning
-        const z = palmPosition[2] / 100;
+        // --- Left Hand: Selection Control ---
+        if (leftHand) {
+          const grabStrength = leftHand.grabStrength;
+          const currentTime = Date.now();
 
-        mesh.current.position.set(x, y, z);
+          // Toggle selection with a fist gesture, respecting the cooldown
+          if (grabStrength > 0.9 && currentTime - lastSelectTime > SELECT_COOLDOWN) {
+            setIsSelected(!isSelected);
+            setLastSelectTime(currentTime);
+          }
+        }
 
-        // --- Rotation Control ---
-        // The hand's orientation (pitch, yaw, roll) is directly mapped to the cube's rotation.
-        // The yaw is inverted to provide a more intuitive mapping.
-        mesh.current.rotation.set(hand.pitch(), -hand.yaw(), hand.roll());
+        // --- Right Hand: Position and Rotation Control ---
+        if (rightHand && isSelected) {
+          const palmPosition = rightHand.palmPosition;
+          const palmVelocity = rightHand.palmVelocity;
 
-        // --- Grab Interaction ---
-        // 'grabStrength' is a value between 0 (open hand) and 1 (closed fist).
-        // When the hand is nearly closed (grabStrength > 0.95), we consider the cube "grabbed".
-        // This is a simple way to detect a grab gesture. More complex interactions could
-        // involve checking individual finger states (e.g., thumb and index finger pinching).
-        const grabStrength = hand.grabStrength;
-        if (grabStrength > 0.95 && !isGrabbed) {
-          setIsGrabbed(true);
-        } else if (grabStrength < 0.8 && isGrabbed) {
-          setIsGrabbed(false);
+          // --- Position Control ---
+          // The hand's palm position is used to control the cube's position in the 3D scene.
+          // The raw Leap Motion coordinates are scaled to fit the scene's dimensions.
+          const x = palmPosition[0] / 100;
+          const y = (palmPosition[1] / 150) - 1.5; // Adjusted scaling and offset
+          const z = palmPosition[2] / 100;
+          mesh.current.position.set(x, y, z);
+
+          // --- Rotation Control (Swipe Gesture) ---
+          // We use the horizontal velocity of the hand to detect a swipe.
+          // A velocity threshold ensures that only intentional swipes trigger rotation.
+          const swipeVelocityThreshold = 200; // Velocity in mm/s
+          const horizontalVelocity = palmVelocity[0];
+
+          if (Math.abs(horizontalVelocity) > swipeVelocityThreshold) {
+            // The rotation amount is proportional to the swipe velocity.
+            const rotationAmount = (horizontalVelocity / 10000);
+            mesh.current.rotation.y -= rotationAmount;
+          }
         }
 
       } else {
-        // If no hand is detected, the cube performs a default rotation animation.
-        mesh.current.rotation.x += 0.005;
-        mesh.current.rotation.y += 0.005;
+        // If no hands are detected, perform a default rotation animation if the cube is not selected.
+        if (!isSelected) {
+            mesh.current.rotation.x += 0.005;
+            mesh.current.rotation.y += 0.005;
+        }
       }
     }
   });
@@ -49,8 +67,8 @@ function Cube({ frame }) {
   return (
     <mesh ref={mesh}>
       <boxGeometry args={[1, 1, 1]} />
-      {/* The cube's color changes to 'hotpink' when it is "grabbed". */}
-      <meshStandardMaterial color={isGrabbed ? 'hotpink' : 'orange'} />
+      {/* The cube's color changes to 'hotpink' when it is "selected". */}
+      <meshStandardMaterial color={isSelected ? 'hotpink' : 'orange'} />
     </mesh>
   );
 }
