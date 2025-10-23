@@ -1,0 +1,19 @@
+.control-panel {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: sans-serif;
+  width: 250px;
+}
+
+.control-panel h2 {
+  margin-top: 0;
+}
+
+.control-panel p {
+  margin: 5px 0;
+}

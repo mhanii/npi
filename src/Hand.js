@@ -15,8 +15,8 @@ const Hand = ({ hand }) => {
   return (
     <group>
       {/* Palm */}
-      <mesh ref={palmRef}>
-        <sphereGeometry args={[0.2, 32, 32]} />
+      <mesh ref={palmRef} castShadow>
+        <boxGeometry args={[0.4, 0.1, 0.5]} />
         <meshStandardMaterial color="lightblue" />
       </mesh>
 
