@@ -15,8 +15,8 @@ function App() {
     <div className="App">
       <ControlPanel frame={frame} />
       <Canvas camera={{ position: [0, 2, 5] }} shadows>
-        <color attach="background" args={['#111']} />
-        <ambientLight intensity={0.5} />
+        <color attach="background" args={['#87CEEB']} />
+        <ambientLight intensity={1} />
         <spotLight
           position={[10, 15, 10]}
           angle={0.3}

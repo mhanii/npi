@@ -1,31 +1,47 @@
 import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
 const Statue = ({ frame }) => {
   const mesh = useRef();
   const [isGrabbed, setIsGrabbed] = useState(false);
-  const [initialRotation, setInitialRotation] = useState(0);
+  const [initialHandX, setInitialHandX] = useState(0);
+  const [initialStatueRotation, setInitialStatueRotation] = useState(0);
 
   useFrame(() => {
+    // Auto-rotate if not grabbed
+    if (mesh.current && !isGrabbed) {
+      mesh.current.rotation.y += 0.01;
+    }
+
     if (frame && frame.hands.length > 0) {
       const hand = frame.hands[0];
-      const handPosition = mesh.current.worldToLocal(hand.palmPosition);
+      const handPositionVec = new THREE.Vector3(...hand.palmPosition);
+      const handPosition = mesh.current.worldToLocal(handPositionVec);
 
+      // Start grabbing
       if (hand.grabStrength > 0.95 && !isGrabbed) {
         if (mesh.current.position.distanceTo(handPosition) < 1) {
           setIsGrabbed(true);
-          setInitialRotation(hand.palmPosition[0]);
+          setInitialHandX(hand.palmPosition[0]);
+          setInitialStatueRotation(mesh.current.rotation.y);
         }
-      } else if (hand.grabStrength < 0.8) {
+      }
+      // Stop grabbing
+      else if (hand.grabStrength < 0.8 && isGrabbed) {
         setIsGrabbed(false);
       }
 
+      // Update rotation while grabbing
       if (isGrabbed) {
-        const rotation = (hand.palmPosition[0] - initialRotation) / 100;
-        mesh.current.rotation.y += rotation;
+        const deltaX = (hand.palmPosition[0] - initialHandX) / 100;
+        mesh.current.rotation.y = initialStatueRotation + deltaX;
       }
-    } else if (mesh.current) {
-      mesh.current.rotation.y += 0.01;
+    } else {
+      // If hands disappear, stop grabbing
+      if (isGrabbed) {
+        setIsGrabbed(false);
+      }
     }
   });
 

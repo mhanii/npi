@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 
 const Box = ({ frame }) => {
   const mesh = useRef();
@@ -8,7 +9,8 @@ const Box = ({ frame }) => {
   useFrame(() => {
     if (frame && frame.hands.length > 0) {
       const hand = frame.hands[0];
-      const handPosition = mesh.current.worldToLocal(hand.palmPosition);
+      const handPositionVec = new THREE.Vector3(...hand.palmPosition);
+      const handPosition = mesh.current.worldToLocal(handPositionVec);
 
       if (hand.grabStrength > 0.95 && !isGrabbed) {
         if (mesh.current.position.distanceTo(handPosition) < 0.5) {
