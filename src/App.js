@@ -1,7 +1,7 @@
 import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import Hand from './Hand';
-import Heart from './Heart';
+import Cube from './Cube';
 import useLeap from './useLeap';
 import './App.css';
 
@@ -14,7 +14,7 @@ function App() {
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
         {frame && frame.hands.map((hand, i) => <Hand key={i} hand={hand} />)}
-        <Heart frame={frame} />
+        <Cube frame={frame} />
       </Canvas>
     </div>
   );
